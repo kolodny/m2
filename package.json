@@ -1,0 +1,34 @@
+{
+  "name": "m2",
+  "version": "0.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Moshe Kolodny",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^1.21.4"
+  },
+  "dependencies": {
+    "bluebird": "^2.3.4",
+    "glob": "^4.0.6",
+    "lodash": "^2.4.1"
+  },
+  "description": "Lightweight Mocha Clone",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kolodny/m2.git"
+  },
+  "keywords": [
+    "mocha",
+    "test"
+  ],
+  "bugs": {
+    "url": "https://github.com/kolodny/m2/issues"
+  },
+  "homepage": "https://github.com/kolodny/m2"
+}
