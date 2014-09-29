@@ -47,18 +47,25 @@ function testFile(file, done, options) {
   var tests = [];
   var thisSuite;
   function describe(describeText, describeCb) {
-    suites.push({describeText: describeText, describeCb: describeCb});
-    thisSuite = suites[suites.length - 1];
+    var suite = {
+      describeText: describeText,
+      describeCb: describeCb,
+      parentSuite: suite
+    };
+    suites.push(suite);
+    thisSuite = suite;
     describeCb();
+    thisSuite = null;
   }
   function it(itText, itCb) {
-    tests.push({
+    var test = {
       parent: thisSuite,
       itText: itText,
       itCb: itCb
-    });
+    };
+    tests.push(test);
     if (!thisSuite.its) thisSuite.its = [];
-    thisSuite.its.push(tests[tests.length - 1]);
+    thisSuite.its.push(test);
   }
   function runTest(done) {
     var waitingFor = 0;
@@ -99,9 +106,9 @@ function testFile(file, done, options) {
       }
     }
   }
-  var testSandbox = new Function('return function(describe, it) {' +
+  var testSandbox = (new Function('return function(describe, it) {' +
    file.contents +
-   '}')()(describe, it);
+   '}'))()(describe, it);
    runTest(done);
 }
 
