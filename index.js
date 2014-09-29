@@ -9,7 +9,8 @@ fs = Promise.promisifyAll(fs);
 function m2(options) {
 
   options = _.extend(options || {}, {
-    recursive: false
+    recursive: false,
+    timeout: 2000
   });
 
   var globStr = 'test/';
@@ -34,14 +35,14 @@ function m2(options) {
   .then(function(files) {
     return Promise.all(files.map(function(file) {
       return new Promise(function(resolve) {
-        testFile(file, resolve)
+        testFile(file, resolve, options)
       });
     }));
   })
 
 }
 
-function testFile(file, done) {
+function testFile(file, done, options) {
   var suites = [];
   var tests = [];
   var thisSuite;
@@ -59,26 +60,49 @@ function testFile(file, done) {
     if (!thisSuite.its) thisSuite.its = [];
     thisSuite.its.push(tests[tests.length - 1]);
   }
-  function runTest() {
+  function runTest(done) {
+    var waitingFor = 0;
+    var doneWrapper = function() {
+      waitingFor--;
+      if (!waitingFor) {
+        passed();
+        done();
+      }
+    };
+    var passed = function() {
+      console.log('passed');
+      clearTimeout(failTimer);
+    };
+    var failed = function(reason) {
+      console.log('failed from ' + reason);
+      clearTimeout(failTimer);
+    };
+    var failTimer;
+
     while (suites.length) {
       var suite = suites.pop();
       if (suite.its)
       while (suite.its.length) {
         var test = suite.its.pop();
         try {
-          test.itCb();
+          test.itCb(doneWrapper);
         } catch(e) {
           console.log('failed');
           throw e;
         }
+        if (test.itCb.length) {
+          waitingFor++;
+          if (!failTimer) {
+            failTimer = setTimeout(failed.bind(null, 'timeout'), options.timeout);
+          }
+        }
       }
-      console.log('passed');
     }
   }
   var testSandbox = new Function('return function(describe, it) {' +
    file.contents +
    '}')()(describe, it);
-   runTest();
+   runTest(done);
 }
 
 m2();
